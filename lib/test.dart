@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_calendar_test/feature/edit_schedule/screen/edit_schedule_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:http/http.dart' as http;
@@ -192,68 +194,85 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Google Calendar App')),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: (selected, focused) {
-                setState(() {
-                  _selectedDay = selected;
-                  _focusedDay = focused;
-                  _eventsForSelectedDay = _getEventsForDay(selected);
-                });
-              },
-              eventLoader: _getEventsForDay,
-            ),
-            Row(
-              children: [
-                ElevatedButton(onPressed: _handleSignIn, child: Text('로그인')),
-                ElevatedButton(
-                  onPressed: () => _navigateToEventForm(),
-                  child: Text('일정 추가'),
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.to(
+                () => EditScheduleScreen(),
+                binding: BindingsBuilder.put(
+                  () => EditScheduleController(DateTime.now()),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_eventsForSelectedDay.isNotEmpty) {
-                      _navigateToEventForm(event: _eventsForSelectedDay.first);
-                    }
-                  },
-                  child: Text('일정 수정'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_eventsForSelectedDay.isNotEmpty) {
-                      _deleteEvent(_eventsForSelectedDay.first.id!);
-                    }
-                  },
-                  child: Text('일정 삭제'),
-                ),
-                ElevatedButton(onPressed: _handleSignOut, child: Text('로그아웃')),
-              ],
-            ),
-            SizedBox(height: 10),
-            Text('일정 목록:'),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _eventsForSelectedDay.length,
-                itemBuilder: (context, index) {
-                  final event = _eventsForSelectedDay[index];
-                  return ListTile(
-                    title: Text(event.summary ?? '(제목 없음)'),
-                    subtitle: Text(event.start?.dateTime?.toString() ?? ''),
-                  );
+              );
+            },
+            icon: Icon(Icons.add),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TableCalendar(
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onDaySelected: (selected, focused) {
+                  setState(() {
+                    _selectedDay = selected;
+                    _focusedDay = focused;
+                    _eventsForSelectedDay = _getEventsForDay(selected);
+                  });
                 },
+                eventLoader: _getEventsForDay,
               ),
-            ),
-            SizedBox(height: 10),
-            Text(_status),
-          ],
+
+              // Row(
+              //   children: [
+              //     ElevatedButton(onPressed: _handleSignIn, child: Text('로그인')),
+              //     ElevatedButton(
+              //       onPressed: () => _navigateToEventForm(),
+              //       child: Text('일정 추가'),
+              //     ),
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         if (_eventsForSelectedDay.isNotEmpty) {
+              //           _navigateToEventForm(event: _eventsForSelectedDay.first);
+              //         }
+              //       },
+              //       child: Text('일정 수정'),
+              //     ),
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         if (_eventsForSelectedDay.isNotEmpty) {
+              //           _deleteEvent(_eventsForSelectedDay.first.id!);
+              //         }
+              //       },
+              //       child: Text('일정 삭제'),
+              //     ),
+              //     ElevatedButton(onPressed: _handleSignOut, child: Text('로그아웃')),
+              //   ],
+              // ),
+              // SizedBox(height: 10),
+              // Text('일정 목록:'),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _eventsForSelectedDay.length,
+                  itemBuilder: (context, index) {
+                    final event = _eventsForSelectedDay[index];
+                    return ListTile(
+                      title: Text(event.summary ?? '(제목 없음)'),
+                      subtitle: Text(event.start?.dateTime?.toString() ?? ''),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(_status),
+            ],
+          ),
         ),
       ),
     );
